@@ -1,0 +1,4 @@
+-----------------  Android Programming Chapter 4  ------------------------
+
+Q1 - What is Specialized Fragments?
+-->  ListFragment, DialogFragment, and PreferenceFragment, which are specialized implementations of the base Fragment class.

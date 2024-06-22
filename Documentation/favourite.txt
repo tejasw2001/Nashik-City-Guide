@@ -1,0 +1,167 @@
+RecyclerView Favview;
+
+    hotelfav_adapter hotelfav_Adapter;
+    placefav_adapter placefav_Adapter;
+    restfav_adapter restfav_Adapter;
+
+    SearchView fav_searchBar;
+
+
+<SearchView
+            android:id="@+id/fav_searchBar"
+            android:layout_marginLeft="40dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="40dp"
+            android:layout_marginBottom="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/searchbar_bg"
+            android:queryHint="Search Favorite"
+            android:layout_below="@+id/note_fav"
+            android:closeIcon="@drawable/cancel_image"
+            android:searchIcon="@drawable/search_image"
+            android:iconifiedByDefault="false">
+        </SearchView>
+
+
+<androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20dp"
+            android:id="@+id/Favview"
+            android:layout_below="@+id/fav_searchBar"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp">
+        </androidx.recyclerview.widget.RecyclerView>
+
+
+
+
+
+
+Favview=(RecyclerView)view.findViewById(R.id.Favview);
+        Favview.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        FirebaseUser firebaseuser = FirebaseAuth.getInstance().getCurrentUser();
+        String userID = firebaseuser.getUid();
+        // HOTEL RECYCLER VIEW CALL
+        FirebaseRecyclerOptions<hoteluserfav> options =
+                new FirebaseRecyclerOptions.Builder<hoteluserfav>()
+                        .setQuery(FirebaseDatabase.getInstance().getReference().child("Favourite").child("Hotel Favorite").child(userID), hoteluserfav.class)
+                        .build();
+
+        hotelfav_Adapter = new hotelfav_adapter(options);
+        Favview.setAdapter(hotelfav_Adapter);
+
+
+        Favview= view.findViewById(R.id.Favview);
+        Favview.setLayoutManager(new LinearLayoutManager(getContext()));
+
+
+        // RESTAURANT RECYCLER VIEW CALL
+        FirebaseRecyclerOptions<restuserfav> recRest_options =
+                new FirebaseRecyclerOptions.Builder<restuserfav>()
+                        .setQuery(FirebaseDatabase.getInstance().getReference().child("Favourite").child("Restaurant Favorite"), restuserfav.class)
+                        .build();
+
+        restfav_Adapter = new restfav_adapter(recRest_options);
+        Favview.setAdapter(restfav_Adapter);
+
+
+        // PLACE RECYCLER VIEW CALL
+        FirebaseRecyclerOptions<placeuserfav> recPlace_options =
+                new FirebaseRecyclerOptions.Builder<placeuserfav>()
+                        .setQuery(FirebaseDatabase.getInstance().getReference().child("Favourite").child("Place Favorite"), placeuserfav.class)
+                        .build();
+
+        placefav_Adapter = new placefav_adapter(recPlace_options);
+        Favview.setAdapter(placefav_Adapter);
+
+
+        fav_searchBar = view.findViewById(R.id.fav_searchBar);
+        fav_searchBar.clearFocus();
+        fav_searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+
+                String search = query.toUpperCase();
+
+                txtSearch(search);
+                return false;
+            }
+        });
+
+
+
+
+
+//        restfav_Adapter.startListening();
+//        placefav_Adapter.startListening();
+
+
+
+//        restfav_Adapter.stopListening();
+//        placefav_Adapter.stopListening();
+
+
+
+
+
+@Override
+    public void onStart() {
+        super.onStart();
+        hotelfav_Adapter.startListening();
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        hotelfav_Adapter.stopListening();
+
+    }
+
+
+
+
+private void txtSearch(String str){
+
+        // HOTEL SEARCH
+        FirebaseRecyclerOptions<hoteluserfav> options =
+                new FirebaseRecyclerOptions.Builder<hoteluserfav>()
+                        .setQuery(FirebaseDatabase.getInstance().getReference().child("Hotel Favorite").orderByChild("name").startAt(str).endAt(str+"~"), hoteluserfav.class)
+                        .build();
+
+        hotelfav_Adapter = new hotelfav_adapter(options);
+        hotelfav_Adapter.startListening();
+        Favview.setAdapter(hotelfav_Adapter);
+        
+    }
+ // RESTAURANT SEARCH
+//        FirebaseRecyclerOptions<restuserfav> rest_options =
+//                new FirebaseRecyclerOptions.Builder<restuserfav>()
+//                        .setQuery(FirebaseDatabase.getInstance().getReference().child("Restaurant Favorite").orderByChild("name").startAt(str).endAt(str+"~"), restuserfav.class)
+//                        .build();
+//
+//        restfav_Adapter = new restfav_adapter(rest_options);
+//        restfav_Adapter.startListening();
+//        Favview.setAdapter(restfav_Adapter);
+//
+//
+//        // PLACE SEARCH
+//        FirebaseRecyclerOptions<placeuserfav> place_options =
+//                new FirebaseRecyclerOptions.Builder<placeuserfav>()
+//                        .setQuery(FirebaseDatabase.getInstance().getReference().child("Place Favorite").orderByChild("title").startAt(str).endAt(str+"~"), placeuserfav.class)
+//                        .build();
+//
+//        placefav_Adapter = new placefav_adapter(place_options);
+//        placefav_Adapter.startListening();
+//        Favview.setAdapter(placefav_Adapter);
+

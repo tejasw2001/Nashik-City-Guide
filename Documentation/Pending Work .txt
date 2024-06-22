@@ -1,0 +1,9 @@
+Pending Work : (In-App)
+
+1- Favroite Activity (Remove from favorite)
+3- Profile Image (Retrieving)
+
+---- OPTIONAL WORK ----
+
+1- OTP Verification (Optional)
+

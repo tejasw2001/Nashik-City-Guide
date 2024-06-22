@@ -1,0 +1,43 @@
+<androidx.cardview.widget.CardView
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="5dp"
+                android:backgroundTint="@color/white"
+                app:cardCornerRadius="18dp"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/connect_using">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:id="@+id/google_signin"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/google"
+                        android:layout_marginLeft="20dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="MissingConstraints">
+                    </ImageView>
+
+                    <ImageView
+                        android:id="@+id/facebook_signup"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/facebook"
+                        android:layout_marginRight="20dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintLeft_toRightOf="@id/google_signin"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="MissingConstraints"></ImageView>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.cardview.widget.CardView>

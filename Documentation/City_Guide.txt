@@ -1,0 +1,27 @@
+Google Feedback Form for City Guide Appliaction : https://forms.gle/GzzL9o6TMpXLu6BS8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Set User Dp
+                    //String imageUrl = "content://com.android.externalstorage.documents/document/primary%3ADCIM%2FSnapchat%2FSnapchat-1198082359.jpg";
+                    //Uri uri = firebaseuser.getPhotoUrl();
+                    //ImageView setImageURI() should not be used with regular URI
+
+                    Uri imageUrl = firebaseuser.getPhotoUrl();
+                    Picasso.get().load(imageUrl).into(profile_photo);
+
+                    //Glide.with(profile_fragment.this).load(uri).into(profile_photo);

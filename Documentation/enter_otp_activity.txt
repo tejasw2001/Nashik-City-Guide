@@ -1,0 +1,382 @@
+package com.example.city_final_final;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseException;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthProvider;
+
+import java.util.concurrent.TimeUnit;
+
+
+public class enter_otp_activity extends AppCompatActivity {
+
+    private final TextWatcher textWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+            if (editable.length()>0){
+
+                if (selectedETPosition == 0){
+
+                    selectedETPosition = 1;
+                    showKeyboard(otp_2);
+
+                } else if (selectedETPosition == 1) {
+
+                    selectedETPosition = 2;
+                    showKeyboard(otp_3);
+
+                } else if (selectedETPosition == 2) {
+
+                    selectedETPosition = 3;
+                    showKeyboard(otp_4);
+
+                } else if (selectedETPosition == 3) {
+
+                    selectedETPosition = 4;
+                    showKeyboard(otp_5);
+
+                } else if (selectedETPosition == 4) {
+
+                    selectedETPosition = 5;
+                    showKeyboard(otp_6);
+                }
+
+            }
+        }
+    };
+
+
+
+    TextView mob_num;
+    private EditText otp_1,otp_2,otp_3,otp_4,otp_5,otp_6;
+    private String verificationId;
+    private TextView resendBtn;
+
+    // true after every 60 second
+    private boolean resendEnabled = false;
+
+    // resend time in seconds
+    private final int resendTime = 60;
+
+    private int selectedETPosition = 0;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_enter_otp);
+
+        mob_num = findViewById(R.id.mobile_number);
+        mob_num.setText(String.format(
+                "+91-%s",getIntent().getStringExtra("regMobile")
+        ));
+
+        resendBtn = findViewById(R.id.resend_otp);
+
+        otp_1 = findViewById(R.id.otp_1_text);
+        otp_2 = findViewById(R.id.otp_2_text);
+        otp_3 = findViewById(R.id.otp_3_text);
+        otp_4 = findViewById(R.id.otp_4_text);
+        otp_5 = findViewById(R.id.otp_5_text);
+        otp_6 = findViewById(R.id.otp_6_text);
+
+        setupOtpInputs();
+
+        final ProgressBar progressbar = findViewById(R.id.progress_bar);
+        final Button verify_btn = findViewById(R.id.verify_btn);
+
+        // by default open keyboard at ic1
+        showKeyboard(otp_1);
+
+        // start resend count down timer
+        startCountDownTimer();
+
+        resendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (resendEnabled){
+
+                    // handle your resend code here
+                    PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                            "+91" + getIntent().getStringExtra("regMobile"),
+                            60,
+                            TimeUnit.SECONDS,
+                            enter_otp_activity.this,
+                            new PhoneAuthProvider.OnVerificationStateChangedCallbacks(){
+
+                                @Override
+                                public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
+
+                                }
+
+                                @Override
+                                public void onVerificationFailed(@NonNull FirebaseException e) {
+
+                                    Toast.makeText(enter_otp_activity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
+                                }
+
+                                @Override
+                                public void onCodeSent(@NonNull String newVerificationId, @NonNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+
+                                    verificationId = newVerificationId;
+                                    Toast.makeText(enter_otp_activity.this,"OTP Sent",Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                    );
+
+                    // start new resend count down timer
+                    startCountDownTimer();
+                }
+            }
+        });
+
+        verificationId = getIntent().getStringExtra("verificationId");
+
+        verify_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (otp_1.getText().toString().trim().isEmpty()
+                        ||otp_2.getText().toString().trim().isEmpty()
+                        ||otp_3.getText().toString().trim().isEmpty()
+                        ||otp_4.getText().toString().trim().isEmpty()
+                        ||otp_5.getText().toString().trim().isEmpty()
+                        ||otp_6.getText().toString().trim().isEmpty()){
+
+                    Toast.makeText(enter_otp_activity.this,"Please Enter Valid Code",Toast.LENGTH_SHORT).show();
+
+                    return;
+                }
+                String generateOTP =
+                        otp_1.getText().toString() +
+                                otp_2.getText().toString() +
+                                otp_3.getText().toString() +
+                                otp_4.getText().toString() +
+                                otp_5.getText().toString() +
+                                otp_6.getText().toString();
+
+                if (generateOTP.length()==6){
+
+                    if (verificationId != null) {
+
+                        progressbar.setVisibility(View.VISIBLE);
+                        verify_btn.setVisibility(View.INVISIBLE);
+                        PhoneAuthCredential phoneAuthCredential = PhoneAuthProvider.getCredential(
+                                verificationId,
+                                generateOTP
+                        );
+                        FirebaseAuth.getInstance().signInWithCredential(phoneAuthCredential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+
+                                progressbar.setVisibility(View.GONE);
+                                verify_btn.setVisibility(View.VISIBLE);
+
+                                if (task.isSuccessful()) {
+
+                                    Intent intent = new Intent(getApplicationContext(), main_ui.class);
+
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+                                } else {
+
+                                    Toast.makeText(enter_otp_activity.this, "The Verification code entered was invalid", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        });
+
+    }
+
+    // Methods related to timer
+    private void showKeyboard(EditText otpET){
+
+        otpET.requestFocus();
+
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.showSoftInput(otpET, InputMethodManager.SHOW_IMPLICIT);
+    }
+
+    private void startCountDownTimer(){
+
+        resendEnabled = false;
+        resendBtn.setTextColor(Color.parseColor("#99000000"));
+
+        new CountDownTimer(resendTime * 1000,1000){
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+                resendBtn.setText("Resend Code ("+(millisUntilFinished / 1000)+")");
+            }
+
+            @Override
+            public void onFinish() {
+
+                resendEnabled = true;
+                resendBtn.setText("Resend Code");
+                resendBtn.setTextColor(getResources().getColor(com.google.android.material.R.color.design_default_color_primary));
+            }
+        }.start();
+    }
+
+    //  the onKeyUp() function is an EventListener used to handle key release events and provide an opportunity to perform some action in response to user input.
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+
+        if (keyCode == KeyEvent.KEYCODE_DEL){
+
+            if (selectedETPosition == 5){
+
+                selectedETPosition = 4;
+                showKeyboard(otp_5);
+            } else if (selectedETPosition == 4) {
+
+                selectedETPosition = 3;
+                showKeyboard(otp_4);
+            } else if (selectedETPosition == 3) {
+
+                selectedETPosition = 2;
+                showKeyboard(otp_3);
+            } else if (selectedETPosition == 2) {
+
+                selectedETPosition = 1;
+                showKeyboard(otp_2);
+            } else if (selectedETPosition == 1) {
+
+                selectedETPosition = 0;
+                showKeyboard(otp_1);
+            }
+
+            return true;
+
+        }else {
+
+            return super.onKeyUp(keyCode, event);
+        }
+
+    }
+
+
+
+    private void setupOtpInputs() {
+        otp_1.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if (s.toString().trim().isEmpty()){
+
+                    otp_2.requestFocus();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+        otp_2.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if (s.toString().trim().isEmpty()){
+
+                    otp_3.requestFocus();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+        otp_3.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if (s.toString().trim().isEmpty()){
+
+                    otp_4.requestFocus();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+        otp_4.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if (s.toString().trim().isEmpty()){
+
+                    otp_5.requestFocus();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+        otp_5.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if (s.toString().trim().isEmpty()){
+
+                    otp_6.requestFocus();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+
+        });
+    }
+
+}
